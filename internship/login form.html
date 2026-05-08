@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cobanga School Permission System - Login</title>
+<style>
+body {
+    font-family: Arial;
+    background: #f4f6f9;
+    margin: 0;
+}
+header {
+    background: #1f82e6;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+nav {
+    background: #1583f1;
+    padding: 10px;
+    text-align: center;
+}
+nav a {
+    color: white;
+    margin: 10px;
+    text-decoration: none;
+}
+section {
+    display: none;
+    padding: 20px;
+}
+section.active {
+    display: block;
+}
+.container {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    
+}
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+}
+button {
+    padding: 10px 20px;
+    margin-top: 10px;
+
+    border: none;
+    background-color: #27ae60;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #151615;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h2>Cobanga School Permission System</h2>
+</header>
+
+<nav>
+    <a href="#" onclick="showSection('login')"><button>Login</button></a>
+    <a href="home.html"><button>Home</button></a>
+    <a href="about.html"><button>About</button></a>
+    <a href="contact.html"><button>Contact</button></a>
+</nav>
+
+<!-- Login Section -->
+<section id="login" class="active">
+    <div class="container">
+        <h2>Login Form</h2>
+        <label for="username">Name:</label>
+        <input type="text" id="username" placeholder="Enter Name" required />
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="Enter Password" required />
+        <label for="role">Role:</label>
+        <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="admin">Admin/Teacher</option>
+        </select>
+        <button onclick="login()">Login</button>
+    </div>
+</section>
+
+<!-- Student Page -->
+<section id="studentPage">
+    <div class="container">
+        <h2>Student Dashboard</h2>
+        <p>Welcome, Student!</p>
+        <!-- You can add student features here, such as request form -->
+        <button onclick="showSection('requestForm')">Request Permission</button>
+        <button onclick="logout()">Logout</button>
+        <div id="studentRequests"></div>
+    </div>
+</section>
+
+<!-- Admin/Teacher Page -->
+<section id="adminPage">
+    <div class="container">
+        <h2>Admin/Teacher Dashboard</h2>
+        <p>Manage Requests</p>
+        <div id="requestsTable"></div>
+        <button onclick="logout()">Logout</button>
+    </div>
+</section>
+
+<!-- Request Form (for students) -->
+<section id="requestForm">
+    <div class="container">
+        <h2>Request Permission</h2>
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Your Name" required />
+        <label for="class">Class:</label>
+        <input type="text" id="class" placeholder="Your Class" required />
+        <label for="reason">Reason:</label>
+        <textarea id="reason" placeholder="Reason for permission" required></textarea>
+        <label for="date">Date:</label>
+        <input type="date" id="date" required />
+        <button onclick="submitRequest()">Submit Request</button>
+        <button onclick="showSection('studentPage')" style="width: 10em;">Back to Dashboard</button>
+        <div id="requestMsg"></div>
+    </div>
+</section>
+<!-- Form y'Admin/Administrator -->
+<section id="adminForm" style="display:none;">
+    <div class="container">
+        <h2>Form y'Admin</h2>
+        <label for="adminID">ID y'Admin:</label>
+        <input type="text" id="adminID" placeholder="enter ID" required />
+        <label for="adminName">Name:</label>
+        <input type="text" id="adminName" placeholder="enter name" required />
+        <label for="adminEmail">Email:</label>
+        <input type="email" id="adminEmail" placeholder="enter email" required />
+        <label for="adminPhone">Telefoni:</label>
+        <input type="text" id="adminPhone" placeholder="enter telefoni" required />
+        <button onclick="saveAdmin()">Bika</button>
+        <button onclick="showSection('login')">Garuka ku kwinjira</button>
+        <div id="adminMsg"></div>
+    </div>
+</section>
+
+<!-- JavaScript for login and navigation -->
+<script>
+  // Fungura function yo kubika admin
+function saveAdmin() {
+    const adminID = document.getElementById('adminID').value.trim();
+    const adminName = document.getElementById('adminName').value.trim();
+    const adminEmail = document.getElementById('adminEmail').value.trim();
+    const adminPhone = document.getElementById('adminPhone').value.trim();
+
+    if (!adminID || !adminName || !adminEmail || !adminPhone) {
+        alert('please,fill all fild.');
+        return;
+    }
+
+    let admins = JSON.parse(localStorage.getItem('admins')) || [];
+    admins.push({ id: adminID, name: adminName, email: adminEmail, phone: adminPhone });
+    localStorage.setItem('admins', JSON.stringify(admins));
+
+    document.getElementById('adminMsg').innerText = 'Admin yakiriwe neza!';
+    // Gusubiza forms
+    document.getElementById('adminID').value = '';
+    document.getElementById('adminName').value = '';
+    document.getElementById('adminEmail').value = '';
+    document.getElementById('adminPhone').value = '';
+}
+function showSection(sectionId) {
+    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+}
+
+// Simulated data storage
+let requests = JSON.parse(localStorage.getItem('requests')) || [];
+
+function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const role = document.getElementById('role').value;
+
+    if (!username || !password || !role) {
+        alert('Please fill all fields.');
+        return;
+    }
+
+    // For demo, we just check if fields are filled
+    // In real app, validate credentials against database
+    if (role === 'student') {
+        showSection('studentPage');
+        loadStudentRequests(username);
+    } else if (role === 'admin') {
+        showSection('adminPage');
+        loadAdminRequests();
+    }
+}
+
+function loadStudentRequests(username) {
+    const userRequests = requests.filter(r => r.name === username);
+    const container = document.getElementById('studentRequests');
+    container.innerHTML = '';
+    if (userRequests.length === 0) {
+        container.innerHTML = '<p>No requests submitted yet.</p>';
+        return;
+    }
+    let html = '<table border="1" cellpadding="5"><tr><th>Reason</th><th>Date</th><th>Status</th></tr>';
+    userRequests.forEach(r => {
+        html += `<tr>
+            <td>${r.reason}</td>
+            <td>${r.date}</td>
+            <td style="color:${r.status==='Pending'?'orange':r.status==='Approved'?'green':'red'};">${r.status}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+function loadAdminRequests() {
+    const container = document.getElementById('requestsTable');
+    if (requests.length === 0) {
+        container.innerHTML = '<p>No requests submitted.</p>';
+        return;
+    }
+    let html = '<table border="1" cellpadding="5"><tr><th>Name</th><th>Class</th><th>Reason</th><th>Date</th><th>Status</th><th>Actions</th></tr>';
+    requests.forEach((r, index) => {
+        html += `<tr>
+            <td>${r.name}</td>
+            <td>${r.class}</td>
+            <td>${r.reason}</td>
+            <td>${r.date}</td>
+            <td style="color:${r.status==='Pending'?'orange':r.status==='Approved'?'green':'red'};">${r.status}</td>
+            <td>
+                <button onclick="updateStatus(${index}, 'Approved')">Approve</button>
+                <button onclick="updateStatus(${index}, 'Rejected')">Reject</button>
+            </td>
+        </tr>`;
+    });
+    container.innerHTML = html;
+}
+
+function submitRequest() {
+    const name = document.getElementById('name').value.trim();
+    const cls = document.getElementById('class').value.trim();
+    const reason = document.getElementById('reason').value.trim();
+    const date = document.getElementById('date').value;
+
+    if (!name || !cls || !reason || !date) {
+        alert('Fill all fields.');
+        return;
+    }
+
+    requests.push({ name, class: cls, reason, date, status: 'Pending' });
+    localStorage.setItem('requests', JSON.stringify(requests));
+    document.getElementById('requestMsg').innerText = 'Request submitted successfully.';
+    document.getElementById('name').value = '';
+    document.getElementById('class').value = '';
+    document.getElementById('reason').value = '';
+    document.getElementById('date').value = '';
+}
+
+function updateStatus(index, status) {
+    requests[index].status = status;
+    localStorage.setItem('requests', JSON.stringify(requests));
+    loadAdminRequests();
+}
+
+// Logout function
+function logout() {
+    showSection('login');
+    // Optionally clear inputs
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('role').value = '';
+}
+
+</script>
+<div id="footer" style=" background:#1e66f5;
+    color:white;
+    padding:50px;
+    text-align:center;">
+     <b> © light by cobanga 2026</b>
+
+</div>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password Validation</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0b0f1a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background: #1c2233;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: #4CAF50;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h3>Login</h3>
+
+    <form onsubmit="return validateForm()">
+        <label>Password (5 characters only)</label>
+        
+        <input 
+            type="password"
+            id="password"
+            required
+            minlength="5"
+            maxlength="5"
+            pattern=".{5}"
+            title="Password must be exactly 5 characters"
+        >
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script>
+function validateForm() {
+    let password = document.getElementById("password").value;
+
+    if (password.length !== 5) {
+        alert("Password must be exactly 5 characters!");
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+</body>
+</html>
